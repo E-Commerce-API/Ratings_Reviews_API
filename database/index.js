@@ -25,14 +25,14 @@ const reviewSchema = new mongoose.Schema({
   }]
 });
 
-const Reviews = mongoose.model('Reviews', reviewSchema);
+module.exports.Reviews = mongoose.model('Reviews', reviewSchema);
 
 const photoSchema = new mongoose.Schema({
   id: Number,
   url: String,
 });
 
-const Photos = mongoose.model('Photos', photoSchema);
+module.exports.Photos = mongoose.model('Photos', photoSchema);
 
 const characteristicSchema = new mongoose.Schema({
   characteristic_id: Number,
@@ -40,69 +40,70 @@ const characteristicSchema = new mongoose.Schema({
   value: Number,
 });
 
-const Characteristics = mongoose.model('Characteristics', characteristicSchema);
+module.exports.Characteristics = mongoose.model('Characteristics', characteristicSchema);
 
 
 
 
 
-let testReview = new Reviews({
-  product_id: 19653,
-  review_id: 635623,
-  rating: 4,
-  summary: 'This is a summary',
-  response: null,
-  date: '2020-09-17T00:00:00.000Z',
-  reviewer_name: 'chich',
-  helpfulness: 4,
-  reported: false,
-});
+// let testReview = new Reviews({
+//   product_id: 19653,
+//   review_id: 635623,
+//   rating: 4,
+//   summary: 'This is a summary',
+//   response: null,
+//   date: '2020-09-17T00:00:00.000Z',
+//   reviewer_name: 'chich',
+//   helpfulness: 4,
+//   reported: false,
+// });
 
-let testPhotos = new Photos({
-  id: 141512,
-  url: 'www.photo.com/photo?cat=dog'
-});
+// let testPhotos = new Photos({
+//   id: 141512,
+//   url: 'www.photo.com/photo?cat=dog'
+// });
 
-let testCharacteristic = new Characteristics({
-  characteristic_id: 561351,
-  name: 'Fabric',
-  value: 135
-});
+// let testCharacteristic = new Characteristics({
+//   characteristic_id: 561351,
+//   name: 'Fabric',
+//   value: 135
+// });
 
-const addPhoto = async () => {
-  try {
-    let newPhoto = await testPhotos;
-    let savedPhoto = await newPhoto.save();
+// const addPhoto = async () => {
+//   try {
+//     let newPhoto = await testPhotos;
+//     let savedPhoto = await newPhoto.save();
 
-    let getReview = await Reviews.findOne({ review_id: 635623 });
-    getReview.photos.push(savedPhoto);
-    let response = await getReview.save();
-  } catch (err) {
-    console.log(err.message)
-  } finally {
-    console.log('Photo saved')
-  }
-}
+//     let getReview = await Reviews.findOne({ review_id: 635623 });
+//     getReview.photos.push(savedPhoto);
+//     let response = await getReview.save();
+//   } catch (err) {
+//     console.log(err.message)
+//   } finally {
+//     console.log('Photo saved')
+//   }
+// }
 
-const addCharacteristic = async () => {
-  try {
-    let newCharacteristic = await testCharacteristic;
-    let savedCharacteristic = await newCharacteristic.save()
+// const addCharacteristic = async () => {
+//   try {
+//     let newCharacteristic = await testCharacteristic;
+//     let savedCharacteristic = await newCharacteristic.save()
 
-    let getReview = await Reviews.findOne({ review_id: 635622 });
-    getReview.characteristics.push(savedCharacteristic);
-    let response = await getReview.save();
-  } catch (err) {
-    console.log(err.message)
-  } finally {
-    console.log('Characteristic saved')
-  }
-}
+//     let getReview = await Reviews.findOne({ review_id: 635623 });
 
-testReview.save()
-  .then(result => {
-    addPhoto()
-    addCharacteristic()
-  })
-  .catch(err => console.log(err.message));
+//     getReview.characteristics.push(savedCharacteristic);
+//     let response = await getReview.save();
+//   } catch (err) {
+//     console.log(err.message)
+//   } finally {
+//     console.log('Characteristic saved')
+//   }
+// }
+
+// testReview.save()
+//   .then(result => {
+//     addPhoto()
+//     addCharacteristic()
+//   })
+//   .catch(err => console.log(err.message));
 

@@ -2,8 +2,7 @@ const path = require('path');
 const express = require('express');
 const bodyparser = require('body-parser');
 const app = express();
-const database = path.resolve(__dirname, 'database', 'index.js')
-const db = require(database);
+const db = require('../database/index.js');
 
 const port = process.env.PORT || 4000;
 
