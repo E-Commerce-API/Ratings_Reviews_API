@@ -18,7 +18,10 @@
   },
   "homepage": "https://github.com/SDC-Jupiter/Ratings_Reviews_API#readme",
   "dependencies": {
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "mongoose": "^5.12.14",
     "nodemon": "^2.0.7"
   }
 }

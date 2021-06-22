@@ -1,14 +1,10 @@
 /*
  * Schema Example for a NoSQL database utilizing MongoDB and Mongoose
-*/
+ */
 
-
-const reviewSchema = new mongoose.Schema({
-  product: Number,
-  results: [eachReviewSchema]
-});
 
 const eachReviewSchema = new mongoose.Schema({
+  product_id: Number,
   review_id: Number,
   rating: Number,
   summary: String,
@@ -18,8 +14,15 @@ const eachReviewSchema = new mongoose.Schema({
   date: Date,
   reviewer_name: String,
   helpfulness: Number,
-  photos: [photoSchema],
-  reported: Boolean
+  reported: Boolean,
+  photos: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'Photos'
+  }],
+  characteristics: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'Each_Characteristic'
+  }]
 });
 
 const photoSchema = new mongoose.Schema({
@@ -27,20 +30,8 @@ const photoSchema = new mongoose.Schema({
   url: String
 });
 
-/* -------------------- */
-
-const ratingSchema = new mongoose.Schema({
-  product_id: Number,
-  ratings: [{
-    1: Number,
-    2: Number,
-    3: Number,
-    4: Number,
-    5: Number
-  }],
-  recommend: {
-    false: Number,
-    true: Number
-  },
-  characteristics: { {}, {}, {} }
-});
+const eachCharacteristicSchema = new mongoose.Schema({
+  characteristic_id: Number,
+  name: String,
+  value: Number
+})
