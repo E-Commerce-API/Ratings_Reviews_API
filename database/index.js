@@ -46,7 +46,7 @@ module.exports.Characteristics = mongoose.model('Characteristics', characteristi
 
 
 
-// let testReview = new Reviews({
+// let testReview = new module.exports.Reviews({
 //   product_id: 19653,
 //   review_id: 635623,
 //   rating: 4,
@@ -58,12 +58,12 @@ module.exports.Characteristics = mongoose.model('Characteristics', characteristi
 //   reported: false,
 // });
 
-// let testPhotos = new Photos({
+// let testPhotos = new module.exports.Photos({
 //   id: 141512,
 //   url: 'www.photo.com/photo?cat=dog'
 // });
 
-// let testCharacteristic = new Characteristics({
+// let testCharacteristic = new module.exports.Characteristics({
 //   characteristic_id: 561351,
 //   name: 'Fabric',
 //   value: 135
