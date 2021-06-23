@@ -4,17 +4,17 @@ const url = require('url');
 
 const getReviews = async (req, res) => {
   let id = req.query.product_id;
-  let page = req.query.page;
-  let count = req.query.count;
+  let page = req.query.page || 0;
+  let count = req.query.count || 5;
 
   let response = {
     product: id,
-    page: page || 0,
-    count: count || 5,
+    page: page,
+    count: count,
     results: []
   }
 
-  let query = await Reviews.find({ product_id: id }).and({ reported: false })
+  let query = await Reviews.find({ product_id: id }).and({ reported: false }).limit(count)
 
   if (!query.length) {
     res.sendStatus(404).end();
