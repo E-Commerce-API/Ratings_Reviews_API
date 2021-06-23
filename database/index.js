@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/sdc', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://localhost/sdc', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
 
 const db = mongoose.connection;
 db.on('error', () => console.log(error.message));
 db.once('open', () => console.log('Successfully connected to SDC database'));
 
 const reviewSchema = new mongoose.Schema({
-  product_id: Number,
-  review_id: Number,
+  product_id: String,
+  // review_id: Number,
   rating: Number,
   summary: String,
   response: String,
@@ -15,6 +15,7 @@ const reviewSchema = new mongoose.Schema({
   reviewer_name: String,
   helpfulness: Number,
   reported: Boolean,
+  recommend: Boolean,
   photos: [{
     type: mongoose.Schema.Types.Mixed,
     ref: 'Photos'
@@ -25,47 +26,50 @@ const reviewSchema = new mongoose.Schema({
   }]
 });
 
-module.exports.Reviews = mongoose.model('Reviews', reviewSchema);
+const Reviews = mongoose.model('Reviews', reviewSchema);
 
 const photoSchema = new mongoose.Schema({
-  id: Number,
-  url: String,
+  url: String
 });
 
-module.exports.Photos = mongoose.model('Photos', photoSchema);
+const Photos = mongoose.model('Photos', photoSchema);
 
 const characteristicSchema = new mongoose.Schema({
-  characteristic_id: Number,
   name: String,
   value: Number,
 });
 
-module.exports.Characteristics = mongoose.model('Characteristics', characteristicSchema);
+const Characteristics = mongoose.model('Characteristics', characteristicSchema);
+
+module.exports = {
+  Reviews,
+  Photos,
+  Characteristics
+}
 
 
 
-
-
-// let testReview = new module.exports.Reviews({
-//   product_id: 19653,
+// let testReview = new Reviews({
+//   product_id: '19653',
 //   review_id: 635623,
 //   rating: 4,
-//   summary: 'This is a summary',
+//   summary: 'This is a summary t00',
 //   response: null,
 //   date: '2020-09-17T00:00:00.000Z',
-//   reviewer_name: 'chich',
+//   reviewer_name: 'christian',
 //   helpfulness: 4,
 //   reported: false,
+//   recommend: true
 // });
 
-// let testPhotos = new module.exports.Photos({
-//   id: 141512,
+// let testPhotos = new Photos({
+//   id: 162351,
 //   url: 'www.photo.com/photo?cat=dog'
 // });
 
-// let testCharacteristic = new module.exports.Characteristics({
-//   characteristic_id: 561351,
-//   name: 'Fabric',
+// let testCharacteristic = new Characteristics({
+//   characteristic_id: 162135,
+//   name: 'Glass',
 //   value: 135
 // });
 
@@ -100,10 +104,17 @@ module.exports.Characteristics = mongoose.model('Characteristics', characteristi
 //   }
 // }
 
-// testReview.save()
-//   .then(result => {
-//     addPhoto()
-//     addCharacteristic()
-//   })
-//   .catch(err => console.log(err.message));
+// const addReview = async () => {
+//   try {
+//     let newReview = await testReview;
+//     let savedReview = await newReview.save()
+//   } catch (err) {
+//     console.log(err.message)
+//   } finally {
+//     console.log('Review Saved')
+//     addPhoto();
+//     addCharacteristic();
+//   }
+// }
 
+// addReview();
