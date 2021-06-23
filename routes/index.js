@@ -14,7 +14,7 @@ const getReviews = async (req, res) => {
     results: []
   }
 
-  let query = await Reviews.find({ product_id: id });
+  let query = await Reviews.find({ product_id: id }).and({ reported: false })
 
   if (!query.length) {
     res.sendStatus(404).end();
