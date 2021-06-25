@@ -13,8 +13,9 @@ const startTime = new Date();
 const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' })
   .pipe(csv.parse({ headers: true }))
   .on('data', async data => {
-    // console.log(data)
+
     let review = new Reviews({
+      _id: data.id,
       review_id: data.id,
       product_id: data.product_id,
       rating: data.rating,
@@ -29,7 +30,6 @@ const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' })
       helpfulness: Number(data.helpfulness)
     })
 
-    // console.log(reviewArray.length)
 
     if (reviewArray.length === 1000) {
       readReview.pause();
@@ -48,5 +48,5 @@ const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' })
       await Reviews.insertMany(reviewArray);
       reviewArray = [];
     }
-    console.log('Data has been imported')
+    console.log(`${count} records have been imported`)
   });

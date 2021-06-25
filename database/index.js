@@ -6,6 +6,7 @@ db.on('error', () => console.log(error.message));
 db.once('open', () => console.log('Successfully connected to SDC database'));
 
 const reviewSchema = new mongoose.Schema({
+  _id: Number,
   product_id: String,
   review_id: Number,
   rating: Number,
@@ -31,6 +32,7 @@ const reviewSchema = new mongoose.Schema({
 const Reviews = mongoose.model('Reviews', reviewSchema);
 
 const photoSchema = new mongoose.Schema({
+  _id: Number,
   review_id: Number,
   url: String
 });

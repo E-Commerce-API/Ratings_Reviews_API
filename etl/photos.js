@@ -3,36 +3,49 @@ const fs = require('fs');
 const path = require('path');
 const csv = require('fast-csv');
 
-const reviewFile = 'reviews_photos.csv';
-const reviewPath = path.resolve(__dirname, 'raw_data', reviewFile);
+const photoFile = 'reviews_photos.csv';
+const photoPath = path.resolve(__dirname, 'raw_data', photoFile);
 
 let photosArray = [];
 let count = 0;
 const startTime = new Date();
 
-const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' })
+const readPhotos = fs.createReadStream(photoPath, { encoding: 'utf8' })
   .pipe(csv.parse({ headers: true }))
   .on('data', async data => {
 
     let photo = new Photos({
+      _id: data.id,
       review_id: data.review_id,
       url: data.url
     })
 
+    // readPhotos.pause();
+    // let findReview = await Reviews.updateOne(
+    //   { review_id: photo.review_id },
+    //   { $push: { photos: photo } })
+    // count++;
+    // readPhotos.resume();
+    // if (count === 1000) {
+    //   let timeElapsed = new Date() - startTime;
+    //   console.log(`${count} number of records inserted in ${timeElapsed}`)
+    // }
+
+
     if (photosArray.length === 1000) {
-      readReview.pause();
-      // await Photos.insertMany(photosArray);
-      (async () => {
-        await photosArray.forEach(async photo => {
-          let findReview = await Reviews.updateOne(
-            { review_id: photo.review_id },
-            { $push: { photos: photo } })
-        })
-      })()
+      readPhotos.pause();
+      // (async () => {
+      //   await photosArray.forEach(async photo => {
+      //     let findReview = await Reviews.updateOne(
+      //       { review_id: photo.review_id },
+      //       { $push: { photos: photo } })
+      //   })
+      // })()
+      await Photos.insertMany(photosArray)
       let timeElapsed = new Date() - startTime;
       console.log(`${count} number of records inserted in ${timeElapsed}`)
       photosArray = [];
-      readReview.resume();
+      readPhotos.resume();
     } else {
       photosArray.push(photo);
       count++;

@@ -2,7 +2,7 @@ const { Reviews, Photos, Characteristics } = require(__dirname + '/../database/i
 const url = require('url');
 
 const getReviews = async (req, res) => {
-  let id = Number(req.query.product_id);
+  let id = req.query.product_id;
   let page = Number(req.query.page) || 0;
   let count = Number(req.query.count) || 5;
   let response = {
@@ -12,19 +12,36 @@ const getReviews = async (req, res) => {
     results: []
   }
 
-  let query = await Reviews.find({ product_id: id }, { characteristics: 0 })
-    .and({ reported: false })
-    .skip(page * count)
-    .limit(count)
-    .catch(err => console.log('ERROR: ', err.message))
+  var pipeline = [
+    {
+      "$match": {
+        "product_id": id
+      }
+    },
+    {
+      "$lookup": {
+        "from": "photos",
+        "localField": "review_id",
+        "foreignField": "review_id",
+        "as": "photos"
+      }
+    },
+    {
+      "$sort": {
+        "review_id": 1.0,
+        //    date: -1,
+        //    helpfulness: -1
+      }
+    },
+    {
+      "$skip": page * count
+    },
+    {
+      "$limit": count
+    }
+  ];
 
-  // query.forEach(async review => {
-  //   // console.log(review)
-  //   let photos = await Photos.find({ review_id: review.review_id })
-  //   // console.log(photos)
-  //   review.photos.push(...photos);
-  //   console.log(review.photos)
-  // })
+  let query = await Reviews.aggregate(pipeline);
 
   if (!query.length) {
     res.json(response).end();
@@ -32,23 +49,24 @@ const getReviews = async (req, res) => {
     response.results.push(...query)
     res.json(response).end();
   }
+
 }
 
 
 const getMeta = async (req, res) => {
   let id = req.query.product_id;
-   let response = {
+  let response = {
     product_id: id,
     ratings: {},
     recommend: {},
     characteristics: {}
-   }
+  }
 
-   let query = await Reviews.find({ product_id: id })
+  let query = await Reviews.find({ product_id: id })
 
-   if (!query.length) {
-     res.sendStatus(404).end();
-   } else {
+  if (!query.length) {
+    res.sendStatus(404).end();
+  } else {
     query.forEach(review => {
       response.ratings[review.rating] = response.ratings[review.rating] + review.rating || review.rating;
       response.recommend[review.recommend] = response.recommend[review.recommend] + 1 || 1;
