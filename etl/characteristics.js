@@ -16,8 +16,8 @@ const readCharacteristics = fs.createReadStream(characteristicsPath, { encoding:
 
     let characteristic = new Characteristics({
       _id: data.id,
-      review_id: data.review_id,
-      url: data.url
+      product_id: data.product_id,
+      name: data.name
     })
 
     if (characteristicsArray.length === 1000) {

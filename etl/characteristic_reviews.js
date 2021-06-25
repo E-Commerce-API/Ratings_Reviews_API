@@ -20,7 +20,7 @@ const readCharacteristics = fs.createReadStream(characteristicsPath, { encoding:
       review_id: data.review_id,
       value: data.value
     })
-
+// console.log(characteristicsArray)
     if (characteristicsArray.length === 1000) {
       readCharacteristics.pause();
       await CharacteristicReviews.insertMany(characteristicsArray)

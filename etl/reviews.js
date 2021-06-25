@@ -13,7 +13,7 @@ const startTime = new Date();
 const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' })
   .pipe(csv.parse({ headers: true }))
   .on('data', async data => {
-console.log(data)
+
     let review = new Reviews({
       _id: data.id,
       review_id: data.id,
