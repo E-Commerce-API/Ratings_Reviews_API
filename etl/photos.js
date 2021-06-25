@@ -1,4 +1,4 @@
-const { Reviews, Photos, Characteristics } = require('../database/index.js');
+const { Photos } = require('../database/index.js');
 const fs = require('fs');
 const path = require('path');
 const csv = require('fast-csv');
@@ -20,27 +20,8 @@ const readPhotos = fs.createReadStream(photoPath, { encoding: 'utf8' })
       url: data.url
     })
 
-    // readPhotos.pause();
-    // let findReview = await Reviews.updateOne(
-    //   { review_id: photo.review_id },
-    //   { $push: { photos: photo } })
-    // count++;
-    // readPhotos.resume();
-    // if (count === 1000) {
-    //   let timeElapsed = new Date() - startTime;
-    //   console.log(`${count} number of records inserted in ${timeElapsed}`)
-    // }
-
-
     if (photosArray.length === 1000) {
       readPhotos.pause();
-      // (async () => {
-      //   await photosArray.forEach(async photo => {
-      //     let findReview = await Reviews.updateOne(
-      //       { review_id: photo.review_id },
-      //       { $push: { photos: photo } })
-      //   })
-      // })()
       await Photos.insertMany(photosArray)
       let timeElapsed = new Date() - startTime;
       console.log(`${count} number of records inserted in ${timeElapsed}`)
@@ -53,14 +34,8 @@ const readPhotos = fs.createReadStream(photoPath, { encoding: 'utf8' })
   })
   .on('end', async () => {
     if (array.length) {
-      (async () => {
-        await photosArray.forEach(async photo => {
-          let findReview = await Reviews.updateOne(
-            { review_id: photo.review_id },
-            { $push: { photos: photo } })
-        })
-      })()
+      await Photos.insertMany(photosArray)
       photosArray = [];
     }
-    console.log('Data has been imported')
+    console.log(`${count} records have been imported`)
   });

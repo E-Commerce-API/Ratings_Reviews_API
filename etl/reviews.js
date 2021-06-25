@@ -1,4 +1,4 @@
-const { Reviews, Photos, Characteristics } = require('../database/index.js');
+const { Reviews } = require('../database/index.js');
 const fs = require('fs');
 const path = require('path');
 const csv = require('fast-csv');
@@ -13,7 +13,7 @@ const startTime = new Date();
 const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' })
   .pipe(csv.parse({ headers: true }))
   .on('data', async data => {
-
+console.log(data)
     let review = new Reviews({
       _id: data.id,
       review_id: data.id,
