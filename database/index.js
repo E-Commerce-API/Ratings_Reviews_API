@@ -11,6 +11,7 @@ const reviewSchema = new mongoose.Schema({
   rating: Number,
   summary: String,
   response: String,
+  body: String,
   date: String,
   reviewer_name: String,
   reviewer_email: String,
@@ -30,13 +31,14 @@ const reviewSchema = new mongoose.Schema({
 const Reviews = mongoose.model('Reviews', reviewSchema);
 
 const photoSchema = new mongoose.Schema({
+  review_id: Number,
   url: String
 });
 
 const Photos = mongoose.model('Photos', photoSchema);
 
 const characteristicSchema = new mongoose.Schema({
-  old_id: Number,
+  review_id: Number,
   name: String,
   value: Number
 });

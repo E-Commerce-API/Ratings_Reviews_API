@@ -1,12 +1,10 @@
 const { Reviews, Photos, Characteristics } = require(__dirname + '/../database/index.js');
 const url = require('url');
 
-
 const getReviews = async (req, res) => {
-  let id = req.query.product_id;
-  let page = req.query.page || 0;
-  let count = req.query.count || 5;
-
+  let id = Number(req.query.product_id);
+  let page = Number(req.query.page) || 0;
+  let count = Number(req.query.count) || 5;
   let response = {
     product: id,
     page: page,
@@ -18,6 +16,15 @@ const getReviews = async (req, res) => {
     .and({ reported: false })
     .skip(page * count)
     .limit(count)
+    .catch(err => console.log('ERROR: ', err.message))
+
+  // query.forEach(async review => {
+  //   // console.log(review)
+  //   let photos = await Photos.find({ review_id: review.review_id })
+  //   // console.log(photos)
+  //   review.photos.push(...photos);
+  //   console.log(review.photos)
+  // })
 
   if (!query.length) {
     res.json(response).end();
@@ -26,6 +33,7 @@ const getReviews = async (req, res) => {
     res.json(response).end();
   }
 }
+
 
 const getMeta = async (req, res) => {
   let id = req.query.product_id;

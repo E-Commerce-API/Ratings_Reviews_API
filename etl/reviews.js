@@ -1,46 +1,52 @@
 const { Reviews, Photos, Characteristics } = require('../database/index.js');
 const fs = require('fs');
 const path = require('path');
+const csv = require('fast-csv');
 
 const reviewFile = 'reviews.csv';
 const reviewPath = path.resolve(__dirname, 'raw_data', reviewFile);
-const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' });
 
-let lineRemainder = '';
+let reviewArray = [];
+let count = 0;
+const startTime = new Date();
 
-readReview.on('data', async (chunk) => {
-  // readReview.pause();
-  let lines = chunk.split('\n');
-  lines[0] = lineRemainder + lines[0];
-  lineRemainder = lines.pop();
+const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' })
+  .pipe(csv.parse({ headers: true }))
+  .on('data', async data => {
+    // console.log(data)
+    let review = new Reviews({
+      review_id: data.id,
+      product_id: data.product_id,
+      rating: data.rating,
+      date: data.date,
+      summary: data.summary,
+      body: data.body,
+      recommend: data.recommend,
+      reported: data.reported,
+      reviewer_name: data.reviewer_name,
+      reviewer_email: data.reviewer_email,
+      response: data.response,
+      helpfulness: Number(data.helpfulness)
+    })
 
-  lines.forEach( async (line) => {
-    line = line.split(',');
-    try {
-      let review = new Reviews({
-        review_id: line[0],
-        product_id: line[1],
-        rating: line[2],
-        date: line[3],
-        summary: line[4],
-        body: line[5],
-        recommend: Boolean(line[6]),
-        reported: Boolean(line[7]),
-        reviewer_name: line[8],
-        reviewer_email: line[9],
-        response: line[10],
-        helpfulness: Number(line[11])
-      });
-      let newReview = await review;
-      let savedReview = await newReview.save();
-    } catch (err) {
-      console.log(err.message);
-    } finally {
-      console.log('Record saved')
+    // console.log(reviewArray.length)
+
+    if (reviewArray.length === 1000) {
+      readReview.pause();
+      await Reviews.insertMany(reviewArray);
+      let timeElapsed = new Date() - startTime;
+      console.log(`${count} number of records inserted in ${timeElapsed}`)
+      reviewArray = [];
+      readReview.resume();
+    } else {
+      reviewArray.push(review);
+      count++;
     }
   })
-});
-
-readReview.on('end', () => {
-  console.log('ended')
-})
+  .on('end', async () => {
+    if (reviewArray.length) {
+      await Reviews.insertMany(reviewArray);
+      reviewArray = [];
+    }
+    console.log('Data has been imported')
+  });
