@@ -33,7 +33,11 @@ const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' })
 
     if (reviewArray.length === 1000) {
       readReview.pause();
-      await Reviews.insertMany(reviewArray);
+      try {
+        await Reviews.insertMany(reviewArray)
+      } catch (err) {
+        console.log(err.message)
+      }
       let timeElapsed = new Date() - startTime;
       console.log(`${count} number of records inserted in ${timeElapsed}`)
       reviewArray = [];

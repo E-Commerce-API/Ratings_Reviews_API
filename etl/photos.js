@@ -33,7 +33,7 @@ const readPhotos = fs.createReadStream(photoPath, { encoding: 'utf8' })
     }
   })
   .on('end', async () => {
-    if (array.length) {
+    if (photosArray.length) {
       await Photos.insertMany(photosArray)
       photosArray = [];
     }

@@ -1,4 +1,4 @@
-const { Reviews, Photos, Characteristics } = require(__dirname + '/../database/index.js');
+const { Reviews, Photos, Characteristics, CharacteristicReviews } = require(__dirname + '/../database/index.js');
 const url = require('url');
 
 const getReviews = async (req, res) => {
@@ -12,36 +12,10 @@ const getReviews = async (req, res) => {
     results: []
   }
 
-  var pipeline = [
-    {
-      "$match": {
-        "product_id": id
-      }
-    },
-    {
-      "$lookup": {
-        "from": "photos",
-        "localField": "review_id",
-        "foreignField": "review_id",
-        "as": "photos"
-      }
-    },
-    {
-      "$sort": {
-        "review_id": 1.0,
-        //    date: -1,
-        //    helpfulness: -1
-      }
-    },
-    {
-      "$skip": page * count
-    },
-    {
-      "$limit": count
-    }
-  ];
-
-  let query = await Reviews.aggregate(pipeline);
+  let query = await Reviews.find({ product_id: id }, { characteristics: 0 })
+    .and({ reported: false })
+    .skip(page * count)
+    .limit(count)
 
   if (!query.length) {
     res.json(response).end();
@@ -57,32 +31,60 @@ const getMeta = async (req, res) => {
   let id = req.query.product_id;
   let response = {
     product_id: id,
-    ratings: {},
+    ratings: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0
+    },
     recommend: {},
     characteristics: {}
   }
 
-  let query = await Reviews.find({ product_id: id })
+  let characteristicsQuery = await Characteristics.find({ product_id: id })
+  let reviewsQuery = await Reviews.find({ product_id: id })
 
-  if (!query.length) {
-    res.sendStatus(404).end();
-  } else {
-    query.forEach(review => {
+  if (reviewsQuery.length) {
+    reviewsQuery.forEach(review => {
       response.ratings[review.rating] = response.ratings[review.rating] + review.rating || review.rating;
       response.recommend[review.recommend] = response.recommend[review.recommend] + 1 || 1;
-
-      if (review.characteristics.length) {
-
-        review.characteristics.forEach(characteristic => {
-          response.characteristics[characteristic.name] = {
-            id: characteristic.characteristic_id,
-            value: characteristic.value
-          }
-        })
-      }
     })
-    res.json(response);
   }
+
+  let index = 0;
+
+  let checkScores = async () => {
+    return new Promise((resolve, reject) => {
+      if (characteristicsQuery.length) {
+      characteristicsQuery.forEach(async characteristic => {
+        response.characteristics[characteristic.name] = {
+          value: 0
+        }
+
+        let scores = await CharacteristicReviews.find({ characteristic_id: characteristic['_id'] });
+        if (scores.length) {
+
+          let value = 0;
+          let numOfValues = 0;
+          let totalValue = 0;
+          for (let i = 0; i < scores.length; i++) {
+            numOfValues++;
+            totalValue += scores[i].value;
+            response.characteristics[characteristic.name].value = totalValue / numOfValues;
+          }
+        }
+        index === characteristicsQuery.length - 1 ? resolve() : index++;
+      })
+    }
+  })
+};
+
+  ( async () => {
+    await checkScores();
+    res.json(response)
+  })()
+
 }
 
 const addPhotos = async (_id, _photo) => {

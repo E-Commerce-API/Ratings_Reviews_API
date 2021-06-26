@@ -40,17 +40,27 @@ const photoSchema = new mongoose.Schema({
 const Photos = mongoose.model('Photos', photoSchema);
 
 const characteristicSchema = new mongoose.Schema({
-  review_id: Number,
-  name: String,
-  value: Number
+  _id: Number,
+  product_id: String,
+  name: String
 });
 
 const Characteristics = mongoose.model('Characteristics', characteristicSchema);
 
+const characteristicReviewsSchema = new mongoose.Schema({
+  _id: Number,
+  characteristic_id: Number,
+  review_id: Number,
+  value: Number
+});
+
+const CharacteristicReviews = mongoose.model('CharacteristicReviews', characteristicReviewsSchema);
+
 module.exports = {
   Reviews,
   Photos,
-  Characteristics
+  Characteristics,
+  CharacteristicReviews
 }
 
 

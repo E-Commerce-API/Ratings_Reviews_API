@@ -34,7 +34,7 @@ const readCharacteristics = fs.createReadStream(characteristicsPath, { encoding:
     }
   })
   .on('end', async () => {
-    if (array.length) {
+    if (characteristicsArray.length) {
       await CharacteristicReviews.insertMany(characteristicsArray)
       characteristicsArray = [];
     }
