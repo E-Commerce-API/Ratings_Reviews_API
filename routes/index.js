@@ -57,66 +57,88 @@ const getMeta = async (req, res) => {
   let checkScores = async () => {
     return new Promise((resolve, reject) => {
       if (characteristicsQuery.length) {
-      characteristicsQuery.forEach(async characteristic => {
-        response.characteristics[characteristic.name] = {
-          value: 0
-        }
-
-        let scores = await CharacteristicReviews.find({ characteristic_id: characteristic['_id'] });
-        if (scores.length) {
-
-          let value = 0;
-          let numOfValues = 0;
-          let totalValue = 0;
-          for (let i = 0; i < scores.length; i++) {
-            numOfValues++;
-            totalValue += scores[i].value;
-            response.characteristics[characteristic.name].value = totalValue / numOfValues;
+        characteristicsQuery.forEach(async characteristic => {
+          response.characteristics[characteristic.name] = {
+            value: 0
           }
-        }
-        index === characteristicsQuery.length - 1 ? resolve() : index++;
-      })
-    }
-  })
-};
 
-  ( async () => {
+          let scores = await CharacteristicReviews.find({ characteristic_id: characteristic['_id'] });
+          if (scores.length) {
+
+            let value = 0;
+            let numOfValues = 0;
+            let totalValue = 0;
+            for (let i = 0; i < scores.length; i++) {
+              numOfValues++;
+              totalValue += scores[i].value;
+              response.characteristics[characteristic.name].value = totalValue / numOfValues;
+            }
+          }
+          index === characteristicsQuery.length - 1 ? resolve() : index++;
+        })
+      }
+    })
+  };
+
+  (async () => {
     await checkScores();
     res.json(response)
   })()
 
 }
 
-const addPhotos = async (_id, _photo) => {
+const addCharacteristic = async (_productId, _key, _value, _reviewId) => {
 
-  const newPhoto = new Photos({
-    url: _photo
-  })
-
-  let addPhoto = await newPhoto;
-  let savedPhoto = await newPhoto.save();
-  let findReview = await Reviews.find({ _id: _id });
-  findReview[0].photos.push(savedPhoto);
-  let response = await findReview[0].save();
-
-}
-
-const addCharacteristics = async (_id, _key, _value) => {
-
-  const newCharacteristic = new Characteristics({
-    name: _key,
-    value: _value
+  let newCharacteristic = new Characteristics({
+    product_id: _productId,
+    name: _key
   });
 
-  let addCharacteristic = await newCharacteristic;
-  let savedCharacteristic = await addCharacteristic.save();
-  let findReview = await Reviews.find({ _id: _id });
-  findReview[0].characteristics.push(savedCharacteristic);
-  let response = await findReview[0].save();
+  let saved = await newCharacteristic.save();
+
+  let newCharacteristicReview = new CharacteristicReviews({
+    characteristic_id: newCharacteristic['_id'],
+    review_id: _reviewId,
+    value: _value
+  })
+
+  let savedCharacteristicReview = await newCharacteristicReview.save();
+}
+
+const addPhoto = async (_reviewId, _url) => {
+  let newPhoto = new Photos({
+    review_id: _reviewId,
+    url: _url
+  })
+
+  let savedPhoto = await newPhoto.save();
+}
+
+const aggregation = async (_id) => {
+  console.log(_id)
+  let agg = await Reviews.aggregate([
+    {
+      "$match": {
+        "_id": _id
+      }
+    },
+    {
+      "$lookup": {
+        "from": "photos",
+        "localField": "_id",
+        "foreignField": "review_id",
+        "as": "photos"
+      }
+    },
+    {
+      "$out": "reviews"
+    }
+  ])
+  let test = await Photos.find({review_id: _id})
+  console.log(testCharacteristic)
 }
 
 const addReview = async (req, res) => {
-  let addNewReview;
 
   let review = new Reviews({
     product_id: req.body.product_id,
@@ -127,23 +149,25 @@ const addReview = async (req, res) => {
     name: req.body.name,
     email: req.body.email,
     reported: false,
-    helpfulness: 0
+    helpfulness: 0,
+    // photos: [...req.body.photos]
   });
 
-  try {
-    let newReview = await review;
-    addNewReview = await newReview.save();
-  } catch (err) {
-    console.log(err.message)
-  } finally {
-    req.body.photos.forEach(photo => {
-      addPhotos(addNewReview._id, photo)
-    })
-    for (let key in req.body.characteristics) {
-      addCharacteristics(addNewReview._id, key, req.body.characteristics[key]);
-    }
-    res.sendStatus(201)
+  let savedReview = await review.save();
+
+  let makePhoto = req.body.photos;
+  makePhoto.forEach(photo => {
+    addPhoto(review['_id'], photo);
+  });
+
+  let makeCharacteristic = req.body.characteristics;
+  for (let key in makeCharacteristic) {
+    addCharacteristic(req.body.product_id, key, makeCharacteristic[key], review['_id'])
   }
+
+  aggregation(review['_id']);
+
+  res.sendStatus(201);
 }
 
 const updateHelpfulness = async (req, res) => {
@@ -161,7 +185,7 @@ const updateHelpfulness = async (req, res) => {
 const updateReported = async (req, res) => {
 
   let review_id = req.url.slice(9, -7);
-  console.log(review_id)
+
   let filter = { _id: review_id };
   let update = { reported: true };
   let fetchedReview = await Reviews.findOneAndUpdate(filter, update);

@@ -15,7 +15,6 @@ const readReview = fs.createReadStream(reviewPath, { encoding: 'utf8' })
   .on('data', async data => {
 
     let review = new Reviews({
-      _id: data.id,
       review_id: data.id,
       product_id: data.product_id,
       rating: data.rating,
