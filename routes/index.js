@@ -72,6 +72,9 @@ const getMeta = async (req, res) => {
   }
 
   let index = 0;
+  let value = 0;
+  let numOfValues = 0;
+  let totalValue = 0;
   let checkScores = async () => {
     return new Promise((resolve, reject) => {
       if (characteristicsQuery.length) {
@@ -82,15 +85,11 @@ const getMeta = async (req, res) => {
 
           let scores = await CharacteristicReviews.find({ characteristic_id: characteristic['_id'] });
 
-          let value = 0;
-          let numOfValues = 0;
-          let totalValue = 0;
           if (scores.length) {
 
             for (let i = 0; i < scores.length; i++) {
               numOfValues++;
               totalValue += scores[i].value;
-              console.log(totalValue)
             }
           }
           response.characteristics[characteristic.name].value = totalValue / numOfValues;
