@@ -2,7 +2,7 @@ const { Reviews, Photos, Characteristics, CharacteristicReviews } = require(__di
 const url = require('url');
 
 const getReviews = async (req, res) => {
-  let id = req.query.product_id;
+  let id = Number(req.query.product_id);
   let page = Number(req.query.page) || 0;
   let count = Number(req.query.count) || 5;
   let response = {
@@ -12,10 +12,29 @@ const getReviews = async (req, res) => {
     results: []
   }
 
-  let query = await Reviews.find({ product_id: id }, { characteristics: 0 })
-    .and({ reported: false })
-    .skip(page * count)
-    .limit(count)
+  let pipeline = [
+    {
+      "$match": {
+        "product_id": id
+      }
+    },
+    {
+      "$lookup": {
+        "from": "photos",
+        "localField": "id",
+        "foreignField": "review_id",
+        "as": "photos"
+      }
+    },
+    {
+      "$skip": (page * count)
+    },
+    {
+      "$limit": count
+    }
+  ];
+
+  let query = await Reviews.aggregate(pipeline)
 
   if (!query.length) {
     res.json(response).end();
@@ -53,7 +72,6 @@ const getMeta = async (req, res) => {
   }
 
   let index = 0;
-
   let checkScores = async () => {
     return new Promise((resolve, reject) => {
       if (characteristicsQuery.length) {
@@ -63,17 +81,19 @@ const getMeta = async (req, res) => {
           }
 
           let scores = await CharacteristicReviews.find({ characteristic_id: characteristic['_id'] });
+
+          let value = 0;
+          let numOfValues = 0;
+          let totalValue = 0;
           if (scores.length) {
 
-            let value = 0;
-            let numOfValues = 0;
-            let totalValue = 0;
             for (let i = 0; i < scores.length; i++) {
               numOfValues++;
               totalValue += scores[i].value;
-              response.characteristics[characteristic.name].value = totalValue / numOfValues;
+              console.log(totalValue)
             }
           }
+          response.characteristics[characteristic.name].value = totalValue / numOfValues;
           index === characteristicsQuery.length - 1 ? resolve() : index++;
         })
       }
@@ -89,7 +109,11 @@ const getMeta = async (req, res) => {
 
 const addCharacteristic = async (_productId, _key, _value, _reviewId) => {
 
+  let characteristicCount = await Characteristics.find({}).sort({ id: -1 }).limit(1);
+  let characteristicReviewCount = await CharacteristicReviews.find({}).sort({ id: -1 }).limit(1);
+
   let newCharacteristic = new Characteristics({
+    _id: (characteristicCount[0].id + 1),
     product_id: _productId,
     name: _key
   });
@@ -97,16 +121,21 @@ const addCharacteristic = async (_productId, _key, _value, _reviewId) => {
   let saved = await newCharacteristic.save();
 
   let newCharacteristicReview = new CharacteristicReviews({
-    characteristic_id: newCharacteristic['_id'],
+    _id: (characteristicReviewCount[0].id + 1),
+    characteristic_id: newCharacteristic.id,
     review_id: _reviewId,
     value: _value
   })
 
   let savedCharacteristicReview = await newCharacteristicReview.save();
+
 }
 
 const addPhoto = async (_reviewId, _url) => {
+  let count = await Photos.find({}).sort({ id: -1 }).limit(1);
+
   let newPhoto = new Photos({
+    id: (count[0].id + 1),
     review_id: _reviewId,
     url: _url
   })
@@ -114,33 +143,19 @@ const addPhoto = async (_reviewId, _url) => {
   let savedPhoto = await newPhoto.save();
 }
 
-const aggregation = async (_id) => {
-  console.log(_id)
-  let agg = await Reviews.aggregate([
-    {
-      "$match": {
-        "_id": _id
-      }
-    },
-    {
-      "$lookup": {
-        "from": "photos",
-        "localField": "_id",
-        "foreignField": "review_id",
-        "as": "photos"
-      }
-    },
-    {
-      "$out": "reviews"
-    }
-  ])
-  let test = await Photos.find({review_id: _id})
-  console.log(testCharacteristic)
-}
 
 const addReview = async (req, res) => {
 
+  let count = await Reviews.find({}).sort({ id: -1 }).limit(1);
+
+  let newPhotos = []
+
+  req.body.photos.forEach(photo => {
+    newPhotos.push({ url: photo })
+  })
+
   let review = new Reviews({
+    id: (count[0].id + 1),
     product_id: req.body.product_id,
     rating: req.body.rating,
     summary: req.body.summary,
@@ -150,22 +165,24 @@ const addReview = async (req, res) => {
     email: req.body.email,
     reported: false,
     helpfulness: 0,
-    // photos: [...req.body.photos]
+    photos: [...newPhotos]
   });
 
   let savedReview = await review.save();
 
   let makePhoto = req.body.photos;
-  makePhoto.forEach(photo => {
-    addPhoto(review['_id'], photo);
+
+
+  makePhoto.forEach(async photo => {
+    await addPhoto(review.id, photo);
   });
 
   let makeCharacteristic = req.body.characteristics;
-  for (let key in makeCharacteristic) {
-    addCharacteristic(req.body.product_id, key, makeCharacteristic[key], review['_id'])
-  }
+  let index = 0;
 
-  aggregation(review['_id']);
+  for (let key in makeCharacteristic) {
+    await addCharacteristic(req.body.product_id, key, makeCharacteristic[key], review.id)
+  }
 
   res.sendStatus(201);
 }

@@ -6,7 +6,8 @@ db.on('error', () => console.log(error.message));
 db.once('open', () => console.log('Successfully connected to SDC database'));
 
 const reviewSchema = new mongoose.Schema({
-  product_id: String,
+  id: Number,
+  product_id: Number,
   rating: Number,
   summary: String,
   response: String,
@@ -26,13 +27,15 @@ const reviewSchema = new mongoose.Schema({
 const Reviews = mongoose.model('Reviews', reviewSchema);
 
 const photoSchema = new mongoose.Schema({
-  review_id: mongoose.Schema.ObjectId,
+  id: Number,
+  review_id: Number,
   url: String
 });
 
 const Photos = mongoose.model('Photos', photoSchema);
 
 const characteristicSchema = new mongoose.Schema({
+  _id: Number,
   product_id: String,
   name: String
 });
@@ -40,7 +43,8 @@ const characteristicSchema = new mongoose.Schema({
 const Characteristics = mongoose.model('Characteristics', characteristicSchema);
 
 const characteristicReviewsSchema = new mongoose.Schema({
-  characteristic_id: mongoose.Schema.ObjectId,
+  _id: Number,
+  characteristic_id: Number,
   review_id: String,
   value: Number
 });
