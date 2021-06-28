@@ -15,7 +15,10 @@ const getReviews = async (req, res) => {
   let pipeline = [
     {
       "$match": {
-        "product_id": id
+        "$and":[
+          { "product_id": id },
+          { "reported": false }
+        ]
       }
     },
     {
@@ -47,7 +50,7 @@ const getReviews = async (req, res) => {
 
 
 const getMeta = async (req, res) => {
-  let id = req.query.product_id;
+  let id = Number(req.query.product_id);
   let response = {
     product_id: id,
     ratings: {
@@ -75,6 +78,7 @@ const getMeta = async (req, res) => {
   let value = 0;
   let numOfValues = 0;
   let totalValue = 0;
+
   let checkScores = async () => {
     return new Promise((resolve, reject) => {
       if (characteristicsQuery.length) {
@@ -83,7 +87,7 @@ const getMeta = async (req, res) => {
             value: 0
           }
 
-          let scores = await CharacteristicReviews.find({ characteristic_id: characteristic['_id'] });
+          let scores = await CharacteristicReviews.find({ characteristic_id: characteristic.id });
 
           if (scores.length) {
 
@@ -112,7 +116,7 @@ const addCharacteristic = async (_productId, _key, _value, _reviewId) => {
   let characteristicReviewCount = await CharacteristicReviews.find({}).sort({ id: -1 }).limit(1);
 
   let newCharacteristic = new Characteristics({
-    _id: (characteristicCount[0].id + 1),
+    id: (characteristicCount[0].id + 1),
     product_id: _productId,
     name: _key
   });
@@ -120,7 +124,7 @@ const addCharacteristic = async (_productId, _key, _value, _reviewId) => {
   let saved = await newCharacteristic.save();
 
   let newCharacteristicReview = new CharacteristicReviews({
-    _id: (characteristicReviewCount[0].id + 1),
+    id: (characteristicReviewCount[0].id + 1),
     characteristic_id: newCharacteristic.id,
     review_id: _reviewId,
     value: _value

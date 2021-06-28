@@ -15,7 +15,7 @@ const readCharacteristics = fs.createReadStream(characteristicsPath, { encoding:
   .on('data', async data => {
 
     let characteristic = new Characteristics({
-      _id: data.id,
+      id: data.id,
       product_id: data.product_id,
       name: data.name
     })

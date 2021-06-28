@@ -35,17 +35,17 @@ const photoSchema = new mongoose.Schema({
 const Photos = mongoose.model('Photos', photoSchema);
 
 const characteristicSchema = new mongoose.Schema({
-  _id: Number,
-  product_id: String,
+  id: Number,
+  product_id: Number,
   name: String
 });
 
 const Characteristics = mongoose.model('Characteristics', characteristicSchema);
 
 const characteristicReviewsSchema = new mongoose.Schema({
-  _id: Number,
+  id: Number,
   characteristic_id: Number,
-  review_id: String,
+  review_id: Number,
   value: Number
 });
 

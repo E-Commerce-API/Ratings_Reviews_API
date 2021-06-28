@@ -24,7 +24,11 @@
     "fast-csv": "^4.3.6",
     "mongoose": "^5.12.14",
     "mongoose-sequence": "^5.3.1",
+    "newrelic": "^7.5.1",
     "nodemon": "^2.0.7",
     "url": "^0.11.0"
+  },
+  "devDependencies": {
+    "artillery": "^1.7.4"
   }
 }
