@@ -6,6 +6,6 @@ config:
 scenarios:
   - flow:
     - get:
-        url: "/reviews?product_id=19089"
+        url: "/reviews/meta?product_id=19089"
 
-# $(npm bin)/artillery run artilleryGetReviews.yaml
+# $(npm bin)/artillery run artilleryGetMeta.yaml
