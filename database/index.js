@@ -51,11 +51,32 @@ const characteristicReviewsSchema = new mongoose.Schema({
 
 const CharacteristicReviews = mongoose.model('CharacteristicReviews', characteristicReviewsSchema);
 
+const combinedReviewsSchema = new mongoose.Schema({
+  _id: Number,
+  id: Number,
+  product_id: Number,
+  rating: Number,
+  date: String,
+  summary: String,
+  body: String,
+  recommend: Boolean,
+  reported: Boolean,
+  reviewer_name: String,
+  reviewer_email: String,
+  response: String,
+  helpfulness: Number,
+  photos: [mongoose.Schema.Types.Mixed],
+  characteristics: [mongoose.Schema.Types.Mixed]
+});
+
+const CombinedReviews = mongoose.model('CombinedReviews', combinedReviewsSchema, 'combinedReviews')
+
 module.exports = {
   Reviews,
   Photos,
   Characteristics,
-  CharacteristicReviews
+  CharacteristicReviews,
+  CombinedReviews
 }
 
 
