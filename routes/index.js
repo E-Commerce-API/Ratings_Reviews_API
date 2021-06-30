@@ -118,7 +118,7 @@ const addReview = async (req, res) => {
     id: count[0].id + 1,
     product_id: req.body.product_id,
     rating: req.body.rating,
-    date: new Date().toISOString(),
+    date: new Date().getTime(),
     summary: req.body.summary,
     body: req.body.body,
     recommend: req.body.recommend,
