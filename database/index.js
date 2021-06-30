@@ -6,7 +6,8 @@ db.on('error', () => console.log(error.message));
 db.once('open', () => console.log('Successfully connected to SDC database'));
 
 const reviewSchema = new mongoose.Schema({
-  product_id: String,
+  id: Number,
+  product_id: Number,
   rating: Number,
   summary: String,
   response: String,
@@ -26,32 +27,56 @@ const reviewSchema = new mongoose.Schema({
 const Reviews = mongoose.model('Reviews', reviewSchema);
 
 const photoSchema = new mongoose.Schema({
-  review_id: mongoose.Schema.ObjectId,
+  id: Number,
+  review_id: Number,
   url: String
 });
 
 const Photos = mongoose.model('Photos', photoSchema);
 
 const characteristicSchema = new mongoose.Schema({
-  product_id: String,
+  id: Number,
+  product_id: Number,
   name: String
 });
 
 const Characteristics = mongoose.model('Characteristics', characteristicSchema);
 
 const characteristicReviewsSchema = new mongoose.Schema({
-  characteristic_id: mongoose.Schema.ObjectId,
-  review_id: String,
+  id: Number,
+  characteristic_id: Number,
+  review_id: Number,
   value: Number
 });
 
 const CharacteristicReviews = mongoose.model('CharacteristicReviews', characteristicReviewsSchema);
 
+const combinedReviewsSchema = new mongoose.Schema({
+  _id: Number,
+  id: Number,
+  product_id: Number,
+  rating: Number,
+  date: String,
+  summary: String,
+  body: String,
+  recommend: Boolean,
+  reported: Boolean,
+  reviewer_name: String,
+  reviewer_email: String,
+  response: String,
+  helpfulness: Number,
+  photos: [mongoose.Schema.Types.Mixed],
+  characteristics: [mongoose.Schema.Types.Mixed]
+});
+
+const CombinedReviews = mongoose.model('CombinedReviews', combinedReviewsSchema, 'combinedReviews')
+
 module.exports = {
   Reviews,
   Photos,
   Characteristics,
-  CharacteristicReviews
+  CharacteristicReviews,
+  CombinedReviews
 }
 
 

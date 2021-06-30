@@ -15,6 +15,7 @@ const readPhotos = fs.createReadStream(photoPath, { encoding: 'utf8' })
   .on('data', async data => {
 
     let photo = new Photos({
+      _id: data.id,
       review_id: data.review_id,
       url: data.url
     })

@@ -1,9 +1,15 @@
+require('newrelic')
 const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const morgan = require('morgan');
 const { Reviews, Photos, Characteristics } = require('../database/index.js');
 const { getReviews, getMeta, addReview, updateHelpfulness, updateReported } = require('../routes/index.js');
+
+// if (config.util.getEnv('NODE_ENV') !== 'test') {
+//   app.use(morgan('tiny'));
+// }
 
 const port = process.env.PORT || 4000;
 app.use(bodyParser.urlencoded({
