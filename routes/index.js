@@ -5,6 +5,7 @@ const url = require('url');
  * GET ALL REVIEWS
  */
 const getReviews = async (req, res) => {
+  let sort;
   let id = Number(req.query.product_id);
   let page = Number(req.query.page) || 0;
   let count = Number(req.query.count) || 5;
@@ -15,9 +16,12 @@ const getReviews = async (req, res) => {
     results: []
   }
 
-  let query = await CombinedReviews.find({ product_id: id }, { characteristics: 0 })
+  req.query.sort === 'helpful' ? sort = { helpfulness: -1 } : req.query.sort === 'newest' ? sort = { date: -1 } : req.query.sort === 'relevant' ? sort = { helpfulness: -1, date: -1 } : null;
+
+  let query = await CombinedReviews.find({ product_id: id, reported: { $ne: true } }, { characteristics: 0 })
     .skip(page * count)
     .limit(count)
+    .sort(sort)
 
   if (!query.length) {
     res.json(response).end();
@@ -48,7 +52,7 @@ const getMeta = async (req, res) => {
   let reviewsQuery = await CombinedReviews.find({ product_id: id }, { photos: 0 });
 
   let characteristics;
-  let values = [];
+  let values = {};
 
   if (reviewsQuery.length) {
     reviewsQuery.forEach((review, i) => {
@@ -57,68 +61,35 @@ const getMeta = async (req, res) => {
 
       characteristics = review.characteristics;
 
-      console.log(review)
       characteristics.forEach(characteristic => {
-        i === 0 ? values.push({ name: characteristic.name, score: characteristic.value }) : null;
+        if (!values[characteristic.name.name]) {
+          values[characteristic.name.name] = {
+            scores: [characteristic.value]
+          }
+        } else {
+          values[characteristic.name.name].scores.push(characteristic.value)
+        }
 
-        response.characteristics[characteristic.name] = 0
+        response.characteristics[characteristic.name.name] = 0
       })
     })
   }
 
-  if (values.length) {
-    values.forEach(({ name, score }) => {
-      console.log(score)
-      score.forEach(({ value }, i) => {
-        // console.log('i', i, 'length', score.length, 'value', value)
-        response.characteristics[name] = i === score.length - 1 ? (response.characteristics[name] + value) / score.length : response.characteristics[name] + value || value
-      })
-    })
+  for (let key in values) {
+    response[key] = values[key].scores.reduce(function (avg, value, _, { length }) {
+      return avg + value / length;
+    }, 0);
   }
 
   res.json(response)
 }
 
-// const addCharacteristic = async (_productId, _key, _value, _reviewId) => {
-
-//   let characteristicCount = await Characteristics.find({}).sort({ id: -1 }).limit(1);
-//   let characteristicReviewCount = await CharacteristicReviews.find({}).sort({ id: -1 }).limit(1);
-
-//   let newCharacteristic = new Characteristics({
-//     id: (characteristicCount[0].id + 1),
-//     product_id: _productId,
-//     name: _key
-//   });
-
-//   let saved = await newCharacteristic.save();
-
-//   let newCharacteristicReview = new CharacteristicReviews({
-//     id: (characteristicReviewCount[0].id + 1),
-//     characteristic_id: newCharacteristic.id,
-//     review_id: _reviewId,
-//     value: _value
-//   })
-
-//   let savedCharacteristicReview = await newCharacteristicReview.save();
-
-// }
-
-// const addPhoto = async (_reviewId, _url) => {
-//   let count = await Photos.find({}).sort({ id: -1 }).limit(1);
-
-//   let newPhoto = new Photos({
-//     id: (count[0].id + 1),
-//     review_id: _reviewId,
-//     url: _url
-//   })
-
-//   let savedPhoto = await newPhoto.save();
-// }
-
-
+/*
+ * POST ROUTE TO ADD REVIEW
+ */
 const addReview = async (req, res) => {
 
-  let count = await CombinedReviews.find({}).sort({ id: -1 }).limit(1);
+  let count = await CombinedReviews.find({}).sort({ _id: -1 }).limit(1);
 
   let newCharacteristics = []
   let newPhotos = []
@@ -133,33 +104,14 @@ const addReview = async (req, res) => {
   for (let key in req.body.characteristics) {
 
     newCharacteristics.push({
-      product_id: req.body.product_id,
-      name: key,
-      value: {
-        review_id: count[0].id + 1,
-        value: req.body.characteristics[key]
-      }
+      review_id: req.body.product_id,
+      name: {
+        product_id: req.body.product_id,
+        name: key
+      },
+      value: req.body.characteristics[key]
     })
   }
-
-  // let newReview = {
-  //   id: count[0].id + 1,
-  //   product_id: req.body.product_id,
-  //   rating: req.body.rating,
-  //   date: new Date().toISOString(),
-  //   summary: req.body.summary,
-  //   body: req.body.body,
-  //   recommend: req.body.recommend,
-  //   reported: false,
-  //   reviewer_name: req.body.name,
-  //   reviewer_email: req.body.email,
-  //   response: '',
-  //   helpfulness: 0,
-  //   photos: newPhotos,
-  //   characteristics: newCharacteristics
-  // }
-
-  // console.log(newReview)
 
   let newReview = new CombinedReviews({
     _id: count[0].id + 1,
@@ -180,46 +132,13 @@ const addReview = async (req, res) => {
   })
 
   let saved = await newReview.save();
-  console.log(saved)
-  // let newPhotos = []
-
-  // req.body.photos.forEach(photo => {
-  //   newPhotos.push({ url: photo })
-  // })
-
-  // let review = new Reviews({
-  //   id: (count[0].id + 1),
-  //   product_id: req.body.product_id,
-  //   rating: req.body.rating,
-  //   summary: req.body.summary,
-  //   body: req.body.body,
-  //   recommend: req.body.recommend,
-  //   name: req.body.name,
-  //   email: req.body.email,
-  //   reported: false,
-  //   helpfulness: 0,
-  //   photos: [...newPhotos]
-  // });
-
-  // let savedReview = await review.save();
-
-  // let makePhoto = req.body.photos;
-
-
-  // makePhoto.forEach(async photo => {
-  //   await addPhoto(review.id, photo);
-  // });
-
-  // let makeCharacteristic = req.body.characteristics;
-  // let index = 0;
-
-  // for (let key in makeCharacteristic) {
-  //   await addCharacteristic(req.body.product_id, key, makeCharacteristic[key], review.id)
-  // }
 
   res.sendStatus(201);
 }
 
+/*
+ * PUT ROUTE FOR HELPFULNESS
+ */
 const updateHelpfulness = async (req, res) => {
 
   let review_id = req.url.slice(9, -8);
@@ -232,6 +151,9 @@ const updateHelpfulness = async (req, res) => {
 
 }
 
+/*
+ * PUT ROUTE FOR REPORTED
+ */
 const updateReported = async (req, res) => {
 
   let review_id = req.url.slice(9, -7);
