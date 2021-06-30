@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/sdc', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
+// mongoose.connect('mongodb://localhost/sdc', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
 
-const db = mongoose.connection;
-db.on('error', () => console.log(error.message));
-db.once('open', () => console.log('Successfully connected to SDC database'));
+// const db = mongoose.connection;
+// db.on('error', () => console.log(error.message));
+// db.once('open', () => console.log('Successfully connected to SDC database'));
 
 const reviewSchema = new mongoose.Schema({
   id: Number,

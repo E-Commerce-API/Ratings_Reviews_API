@@ -90,13 +90,14 @@ const getMeta = async (req, res) => {
 const addReview = async (req, res) => {
 
   let count = await CombinedReviews.find({}).sort({ _id: -1 }).limit(1);
+  !count.length ? count = [ { id: 0 } ] : null;
 
   let newCharacteristics = []
   let newPhotos = []
 
   req.body.photos.forEach(photo => {
     newPhotos.push({
-      review_id: count[0].id + 1,
+      review_id: count[0].id + 1 || 1,
       url: photo
     })
   })
@@ -114,8 +115,8 @@ const addReview = async (req, res) => {
   }
 
   let newReview = new CombinedReviews({
-    _id: count[0].id + 1,
-    id: count[0].id + 1,
+    _id: count[0].id + 1 || 1,
+    id: count[0].id + 1 || 1,
     product_id: req.body.product_id,
     rating: req.body.rating,
     date: new Date().getTime(),
