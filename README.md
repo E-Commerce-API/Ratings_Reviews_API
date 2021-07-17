@@ -1,11 +1,18 @@
 
 # Ratings & Reviews API for E-Commerce Website
 
-Designed, built, and deployed an E-Commerce API backend. 
+#### Overview:
+Responsible for over 24 million lines of csv data. Export from an old database that needed to be restructured for efficient use by an e-commerce clothing retail company. This data comprised of ratings and reviews for several million products. 
 
-Maintained over 24 million lines of csv data.
+#### Challenge:
+I needed to find a way to build a quick, efficient, and reliable backend to serve and store all ratings and review data related to any product ID in our database. 
 
-Averaging 3ms response time locally and 15ms deployed.
+#### Process:
+During the evaluation stages for this project I explored several database options which included a SQL based database in PostgreSQL and a noSQL based database in MongoDB. I weighed the benefits and challenges of each database in decided where to store the old csv data. This included schema designs, aggregation ideas, indexing, memory considerations of server, and overall flow of data to and from the front end. 
+
+#### Solution:
+Following the evaluation I opted to utilize MongoDB as the datastore for this project. I found that the loose rules and document styling of Mongo lend itself to the way that the front end was expecting data when it would be requested. This led to quicker responses with near perfect success rates under heavy load (see testing statistics below).
+
 ## Tech Stack
 
 **Server:** Node, Express, and Axios
