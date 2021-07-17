@@ -1,5 +1,5 @@
 
-# System Design Capstone
+# Ratings & Reviews API for E-Commerce Website
 
 Designed, built, and deployed an E-Commerce API backend. 
 
