@@ -5,7 +5,7 @@
 Responsible for over 24 million lines of csv data. Export from an old database that needed to be restructured for efficient use by an e-commerce clothing retail company. This data comprised of ratings and reviews for several million products. 
 
 #### Challenge:
-I needed to find a way to build a quick, efficient, and reliable backend to serve and store all ratings and review data related to any product ID in our database. 
+Build a quick, efficient, and reliable backend to serve and store all ratings and review data related to any product ID in our database. 
 
 #### Process:
 During the evaluation stages for this project I explored several database options which included a SQL based database in PostgreSQL and a noSQL based database in MongoDB. I weighed the benefits and challenges of each database in decided where to store the old csv data. This included schema designs, aggregation ideas, indexing, memory considerations of server, and overall flow of data to and from the front end. 
@@ -15,17 +15,17 @@ Following the evaluation I opted to utilize MongoDB as the datastore for this pr
 
 ## Tech Stack
 
-**Server:** Node, Express, and Axios
+**Server:** [Node], [Express], and [Axios]
 
-**Database:** MongoDB
+**Database:** [MongoDB]
 
-**Deployment:** 3x AWS EC2 - 20.04 Ubuntu - 8gb SDD 1gb RAM
+**Deployment:** 3x [AWS] EC2 - 20.04 Ubuntu - 8gb SDD 1gb RAM
 
-**Unit Testing:** Mocha, Chai w/ Chai-HTTP
+**Unit Testing:** [Mocha], [Chai] w/ Chai-HTTP
 
-**Local Stress Testing:** New Relic w/ Artillery
+**Local Stress Testing:** [New Relic] w/ [Artillery]
 
-**Cloud Stress Testing:** Loader.io
+**Cloud Stress Testing:** [Loader.io](https://www.loader.io)
 ## Optimizations
 
 Implemented MongoDB aggregation to streamline multiple collections and queries into a single collection and query. 
