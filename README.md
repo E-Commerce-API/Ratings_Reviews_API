@@ -15,15 +15,15 @@ Following the evaluation I opted to utilize MongoDB as the datastore for this pr
 
 ## Tech Stack
 
-**Server:** [Node], [Express], and [Axios]
+**Server:** [Node](https://nodejs.org/), [Express](https://expressjs.com/), and [Axios](https://github.com/axios/axios)
 
-**Database:** [MongoDB]
+**Database:** [MongoDB](https://www.mongodb.com/)
 
-**Deployment:** 3x [AWS] EC2 - 20.04 Ubuntu - 8gb SDD 1gb RAM
+**Deployment:** 3x [AWS](https://aws.amazon.com/) EC2 - 20.04 [Ubuntu](https://ubuntu.com/) - 8gb SDD 1gb RAM
 
-**Unit Testing:** [Mocha], [Chai] w/ Chai-HTTP
+**Unit Testing:** [Mocha](https://mochajs.org/), [Chai](https://www.chaijs.com/) w/ Chai-HTTP
 
-**Local Stress Testing:** [New Relic] w/ [Artillery]
+**Local Stress Testing:** [New Relic](https://www.newrelic.com) w/ [Artillery](https://artillery.io/)
 
 **Cloud Stress Testing:** [Loader.io](https://www.loader.io)
 ## Optimizations
